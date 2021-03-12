@@ -65,20 +65,6 @@ const replitesABody = async (page, aType) => {
 
     //Loop record
     do {
-        //Unable to sync, operation failed
-        // let pageInfos = await page.$$eval('#abbd > li', (lis, aType) => lis.map(li => {
-        //     let a = {};
-        //     if (li.firstElementChild.nodeName !== 'I') {
-        //         let aInfo = await li.firstElementChild;
-        //         let aChildInfo = aInfo.children;
-        //         a.link = aInfo.getAttribute('href')
-        //         a.area = aChildInfo[0].innerHTML;
-        //         a.name = aChildInfo[1].innerHTML;
-        //         a.grade = aType;
-        //     }
-        //     return a;
-        // }), aType);
-        // log.info(pageInfos);
         cur = await page.$eval('#fy > li.cur', li => li.firstElementChild.innerHTML)
         nextPage = 1 + parseInt(cur);
         log.info('now page: ' + cur);
@@ -102,70 +88,8 @@ const replitesABody = async (page, aType) => {
         }
         await page.waitForTimeout(1000);
     } while (nextPage <= parseInt(totalPage))
-
-    // do {
-
-    //     let attractions = await page.$$('#abbd > li');
-    //     for (attraction of attractions) {
-    //         let a_tag = await attraction.firstElementChild;
-    //         if (a_tag.nodeName !== 'i') {
-    //             let a = {};
-    //             let a_atag = await attraction.$('a');
-    //             a.grade = aType;
-    //             a.area = await a_atag.childElementChild[0].innerHTML;
-    //             a.link = await a_atag.getAttribute('href');
-    //             let a_model = Model(a);
-    //             a_model.save();
-    //         }
-    //     }
-
-
-    //     // let attractions = await page.$$eval('#abbd > li', (abbds, aType, saveModel) => {
-    //     //     abbds.map(abbd => {
-    //     //         let childElementChild = abbd.firstElementChild;
-    //     //         let a = {};
-    //     //         if (childElementChild.nodeName !== "I") {
-    //     //             a.grade = aType;
-    //     //             a.area = childElementChild.children[0].innerHTML;
-    //     //             a.name = childElementChild.children[1].innerHTML;
-    //     //             a.link = childElementChild.getAttribute('href');
-    //     //         }
-    //     //         saveModel(a);
-    //     //     })
-    //     //     return a;
-    //     // }, aType, saveModel);
-
-    //     // attractions = await attractions.filter(attraction => !(Object.keys(attraction).length === 0));
-
-    //     // for (let attraction of attractions) {
-    //     //     //Store in the database
-    //     //     let a_model = new Model(attraction);
-    //     //     try {
-    //     //         await a_model.save();
-    //     //     } catch (e) {
-    //     //         log.info(e);
-    //     //         throw e;
-    //     //     }
-    //     // }
-
-    //     log.info(attractions);
-
-    //     //next page
-    //     //set delay time for the page load time
-    //     await page.waitForTimeout(500);
-    //     cur = await page.$eval('#fy > li.cur', li => li.firstElementChild.innerHTML);
-    //     await (await page.$("#fy > li > a[n='" + (1 + parseInt(cur)) + "']")).click();
-    //     log.info('now page is: ' + (parseInt(cur) + 1));
-    //     index++;
-
-    // } while (parseInt(cur) + 1 < parseInt(totalPage))
     log.complete('Crawl to the ' + aType + ' to complete');
     return page;
 }
-
-// function saveModel(model) {
-//     let a_model = new Model(model);
-//     model.save();
-// }
 
 module.exports = replitesA;
