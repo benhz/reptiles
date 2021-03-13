@@ -65,6 +65,7 @@ const replitesABody = async (page, aType) => {
 
     //Loop record
     do {
+        await page.waitForSelector('#fy > li.cur');
         cur = await page.$eval('#fy > li.cur', li => li.firstElementChild.innerHTML)
         nextPage = 1 + parseInt(cur);
         log.info('now page: ' + cur);
@@ -81,12 +82,12 @@ const replitesABody = async (page, aType) => {
             a_Model.save();
         }
 
-        await page.waitForTimeout(500);
         if (nextPage <= totalPage) {
             log.info('next page is: ' + nextPage);
+            await page.waitForSelector("#fy > li > a[n='" + nextPage + "']");
             await (await page.$("#fy > li > a[n='" + nextPage + "']")).click();
+            let bbb = await page.waitForFunction((nextPage) => (document.querySelector('.pagination > .cur > a').innerHTML == nextPage), {}, nextPage);
         }
-        await page.waitForTimeout(1000);
     } while (nextPage <= parseInt(totalPage))
     log.complete('Crawl to the ' + aType + ' to complete');
     return page;
