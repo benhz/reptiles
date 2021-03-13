@@ -2,12 +2,22 @@ const replitesA = require('./AAAA/a');
 const eventUtil = require('./utils/common');
 const isOnline = require('is-online');
 const { Signale } = require('signale');
-const log = new Signale();
+const log = new Signale(log_options);
 
 (async () => {
-    if (await isOnline()) {
-        await replitesA();
-    } else {
-        log('not internet!!!');
+    for (; ;) {
+        if (await isOnline()) {
+            try {
+                await replitesA();
+            }
+            catch (e) {
+                throw e;
+            } finally {
+
+            }
+        } else {
+            log('not internet!!!');
+            setTimeout(3600);
+        }
     }
 })();
