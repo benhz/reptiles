@@ -1,9 +1,17 @@
 module.exports = Object.freeze({
     a_schema: {
         grade: { type: String, require: true },
-        area: { type: String, require: true, default: 'China' },
+        area: {
+            country: { type: String, require: true, default: 'China' },
+            province: { type: String },
+            city: { type: String },
+        },
         name: { type: String, unique: true, require: true },
-        geoLL: { type: Number },
+        formatted_address: { type: String },
+        coordinate: {
+            longitude: { type: String, default: '0' },
+            latitude: { type: String, default: '0' }
+        },
         link: { type: String, }
     }
 })

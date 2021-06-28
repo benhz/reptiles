@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/benhz/reptiles#readme",
   "dependencies": {
+    "axios": "^0.21.1",
     "dotenv": "^8.2.0",
     "is-online": "^9.0.0",
     "mongoose": "^5.12.0",

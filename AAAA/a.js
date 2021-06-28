@@ -1,5 +1,6 @@
 const aLevelUrl = require('../constants').a;
 const aType = require('../constants').aType;
+const amapApi = require('../constants').amapApi;
 const puppeteer = require('puppeteer');
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
@@ -9,10 +10,10 @@ const log = new Signale(log_options);
 const a_schema = require('../schema/a').a_schema;
 const schema = new Schema(a_schema);
 const Model = mongoose.model('A', schema);
+const axios = require('axios');
 require('dotenv').config();
 
 const replitesA = async () => {
-
     mongoose.connect(process.env.db_url, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
 
     //browser
@@ -62,21 +63,35 @@ const replitesABody = async (page, aType) => {
     let nextPages = await page.$$('#fy > li');
     const totalPage = await nextPages[nextPages.length - 1].$eval('a', a => a.getAttribute('n'));
     log.info('Total page is ' + totalPage);
-
+    await page.waitForTimeout(1000)
     //Loop record
     do {
         await page.waitForSelector('#fy > li.cur');
         cur = await page.$eval('#fy > li.cur', li => li.firstElementChild.innerHTML)
         nextPage = 1 + parseInt(cur);
         log.info('now page: ' + cur);
-        let a = {};
         let attractions = await page.$$('#abbd > li');
         for (let index = 1; index < attractions.length; index++) {
+            let a = {
+                grade: '',
+                area: {
+                    country: '',
+                    province: '',
+                    city: '',
+                },
+                name: '',
+                formatted_address: '',
+                coordinate: {
+                    longitude: '',
+                    latitude: ''
+                },
+                link: ''
+            }
             let aLis = await attractions[index].$$('a > i');
             a.grade = aType;
             a.link = await attractions[index].$eval('a', a => a.getAttribute('href'));
-            a.area = await aLis[0].evaluate(node => node.innerText);
             a.name = await aLis[1].evaluate(node => node.innerHTML);
+            a = await administrative(a)
             log.info(a);
             let a_Model = new Model(a);
             a_Model.save();
@@ -88,9 +103,30 @@ const replitesABody = async (page, aType) => {
             await (await page.$("#fy > li > a[n='" + nextPage + "']")).click();
             let bbb = await page.waitForFunction((nextPage) => (document.querySelector('.pagination > .cur > a').innerHTML == nextPage), {}, nextPage);
         }
+
     } while (nextPage <= parseInt(totalPage))
     log.complete('Crawl to the ' + aType + ' to complete');
-    return page;
+}
+
+const administrative = async (aaa) => {
+    amapApiUrl = amapApi + encodeURI(aaa.name);
+    let amapData = (await axios.get(amapApiUrl)).data;
+    console.log(amapData)
+    if (amapData.count != 0) {
+        amapData = amapData.geocodes[0]
+        if (amapData.level !== '兴趣点') {
+            console.log('api无法查到地址')
+        } else {
+            aaa.area.country = amapData.country
+            aaa.area.province = amapData.province
+            aaa.area.city = amapData.city
+            let location = amapData.location.split(",")
+            aaa.coordinate.longitude = location[0]
+            aaa.coordinate.latitude = location[1]
+            aaa.formatted_address = amapData.formatted_address
+        }
+    }
+    return aaa;
 }
 
 module.exports = replitesA;
